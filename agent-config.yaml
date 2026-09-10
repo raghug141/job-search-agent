@@ -1,0 +1,136 @@
+name: Job Search Hunter
+description: AI-powered agent that searches, aggregates, and displays job opportunities in a comprehensive dashboard
+version: 1.0.0
+
+# Agent role and behavior
+agent:
+  role: "Job Search Specialist"
+  instructions: |
+    You are a specialized job search agent designed to hunt for career opportunities.
+    Your responsibilities:
+    1. Search job listings based on specified roles and criteria
+    2. Aggregate results from multiple job sources
+    3. Extract and normalize job details
+    4. Filter by location (Remote/Hybrid), organization type (Startup/Enterprise)
+    5. Format data for dashboard visualization
+    6. Provide detailed job information to users
+
+# Target roles
+target_roles:
+  - Cloud Engineer
+  - DevOps Engineer
+  - Senior IT Support Specialist
+  - Lead IT Support Specialist
+  - Senior Desktop Support Analyst
+  - Lead Desktop Support Analyst
+
+# Location preferences
+locations:
+  - Remote
+  - Hybrid
+
+# Organization types
+organization_types:
+  - Startup
+  - Enterprise
+  - Mid-size
+
+# Job sources/APIs to search
+job_sources:
+  - name: LinkedIn Jobs API
+    enabled: true
+    priority: 1
+  - name: Indeed API
+    enabled: true
+    priority: 2
+  - name: GitHub Jobs
+    enabled: true
+    priority: 3
+  - name: CiscoJobs
+    enabled: true
+    priority: 4
+  - name: AWS Careers
+    enabled: true
+    priority: 5
+  - name: Google Careers
+    enabled: true
+    priority: 6
+  - name: Microsoft Careers
+    enabled: true
+    priority: 7
+
+# Agent tools and permissions
+tools:
+  - name: web_scraper
+    description: Scrape and fetch job listings from APIs
+    enabled: true
+  
+  - name: data_processor
+    description: Parse, normalize, and structure job data
+    enabled: true
+  
+  - name: database
+    description: Store and retrieve job listings
+    enabled: true
+  
+  - name: email_integration
+    description: Send job alerts and notifications
+    enabled: true
+  
+  - name: file_management
+    description: Export job data to CSV/PDF
+    enabled: true
+  
+  - name: scheduler
+    description: Schedule recurring job searches
+    enabled: true
+
+# Dashboard output configuration
+dashboard:
+  enabled: true
+  refresh_interval: 3600  # seconds (1 hour)
+  charts:
+    - job_count_by_role
+    - job_count_by_location
+    - job_count_by_organization
+    - salary_distribution
+    - company_distribution
+  
+  detailed_view_fields:
+    - Job Title
+    - Company Name
+    - Location
+    - Work Type (Remote/Hybrid/On-site)
+    - Organization Size
+    - Salary Range
+    - Job Description
+    - Key Requirements
+    - Benefits
+    - Application URL
+    - Posted Date
+    - Deadline
+    - Experience Level
+    - Match Score
+    - Tags/Keywords
+
+# Search parameters
+search_config:
+  keywords: ["Cloud Engineer", "DevOps", "IT Support", "Desktop Support", "Infrastructure", "Cloud Platform"]
+  location_filter: ["Remote", "Hybrid"]
+  experience_level: ["Senior", "Lead", "Principal"]
+  employment_type: ["Full-time", "Contract"]
+  auto_search_interval: "daily"  # Search frequency
+  max_results_per_source: 50
+  min_match_score: 0.7  # 70% match threshold
+
+# Notification settings
+notifications:
+  enabled: true
+  channels:
+    - email
+    - dashboard
+  alert_on:
+    - new_job_posted
+    - salary_meets_threshold
+    - exact_location_match
+    - perfect_match_found  # 90%+ score
