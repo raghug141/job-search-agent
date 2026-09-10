@@ -1,10 +1,18 @@
-#!/usr/bin/env python3
-"""
-Job Search Agent - Flask Dashboard API
-Provides REST API for job search and dashboard data
-"""
+import os
+import sys
 
-from flask import Flask, jsonify, request
+# Ensure project root is in sys.path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+# Safe encoding for Windows consoles
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+        sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
+
+from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS
 from src.job_searcher import JobSearchEngine, FORTUNE_500_COMPANIES, INDIAN_PRODUCT_COMPANIES
 from datetime import datetime
@@ -16,6 +24,15 @@ CORS(app)
 # Initialize job search engine
 engine = JobSearchEngine()
 
+@app.route('/')
+@app.route('/dashboard')
+def dashboard():
+    """Serves the interactive web dashboard"""
+    dashboard_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'dashboard', 'index.html'))
+    if os.path.exists(dashboard_file):
+        return send_file(dashboard_file)
+    return "Dashboard file not found", 404
+
 @app.route('/api/health', methods=['GET'])
 def health():
     """Health check endpoint"""
@@ -25,16 +42,30 @@ def health():
         "companies_available": len(FORTUNE_500_COMPANIES) + len(INDIAN_PRODUCT_COMPANIES)
     })
 
+@app.route('/api/refresh', methods=['GET', 'POST'])
+def refresh_jobs():
+    """Forces real-time re-scraping of live jobs from portals"""
+    try:
+        jobs = engine.search_all_companies(force_refresh=True)
+        return jsonify({
+            "success": True,
+            "message": f"Successfully scraped {len(jobs)} live jobs across {len(set(j.company for j in jobs))} companies.",
+            "total": len(jobs)
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 @app.route('/api/search', methods=['POST'])
 def search_jobs():
     """Search for jobs with filters"""
     try:
-        data = request.get_json()
+        data = request.get_json() or {}
         
         roles = data.get('roles')
         cities = data.get('cities')
         work_types = data.get('work_types')
         min_salary = data.get('min_salary')
+        source = data.get('source')
         
         # Perform search
         jobs = engine.search_all_companies()
@@ -44,6 +75,9 @@ def search_jobs():
             work_types=work_types,
             min_salary=min_salary
         )
+
+        if source:
+            filtered_jobs = [j for j in filtered_jobs if source.lower() in getattr(j, 'source', '').lower()]
         
         # Format response
         jobs_data = [
@@ -61,6 +95,7 @@ def search_jobs():
                 "benefits": job.benefits,
                 "experience_level": job.experience_level,
                 "application_url": job.application_url,
+                "source": getattr(job, "source", "Live Portal"),
                 "match_score": round(job.match_score * 100),
                 "posted_date": job.posted_date
             }

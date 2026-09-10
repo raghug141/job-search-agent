@@ -37,9 +37,15 @@ organization_types:
 
 # Job sources/APIs to search
 job_sources:
-  - name: LinkedIn Jobs API
+  - name: Naukri.com
     enabled: true
     priority: 1
+  - name: LinkedIn Jobs API
+    enabled: true
+    priority: 2
+  - name: Google Search / Jobs
+    enabled: true
+    priority: 3
   - name: Indeed API
     enabled: true
     priority: 2
